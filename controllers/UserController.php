@@ -6,6 +6,7 @@ class UserController
 {
     public function create()
     {
+        echo "create user";
 
     }
 }

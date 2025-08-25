@@ -1,9 +1,11 @@
 <?php
+require_once __DIR__. '/Controllers/UserController.php';
 
 use Controllers\UserController;
 
 try {
-    $router = new Router();
+    // Routing
+    $router = new Router($db_conn);
     $router->route();
 } catch (Exception $e) {
     header("HTTP/1.0 500 Internal Server Error");
@@ -24,10 +26,10 @@ class Router
     {
         $request_method = strtolower($_SERVER['REQUEST_METHOD']);
         $request_uri = $_SERVER['REQUEST_URI'];
-        $route = $request_method . "::" . $request_uri;
+        $route = $request_method. $request_uri;
 
         switch($route) {
-            case 'post::user':
+            case 'post/user':
                 $this->userController->create();
                 break;
             default:
