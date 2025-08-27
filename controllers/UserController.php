@@ -17,7 +17,6 @@ class UserController
     public function create()
     {
         // Validate _POST
-        print_r($_POST);
         if (!isset($_POST['name']) || !isset($_POST['email']) || !isset($_POST['password'])) {
             http_response_code(400);
             echo 'Missing required fields';
