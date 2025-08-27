@@ -3,9 +3,17 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/controllers/UserController.php';
 require_once __DIR__ . '/controllers/ProductController.php';
 require_once __DIR__ . '/repositories/ProductRepository.php';
+require_once __DIR__ . '/repositories/OrderRepository.php';
+require_once __DIR__ . '/controllers/OrderController.php';
+require_once __DIR__ . '/repositories/OrderItemRepository.php';
+require_once __DIR__ . '/controllers/OrderItemController.php';
 
+use Controllers\OrderController;
+use Controllers\OrderItemController;
 use Controllers\ProductController;
 use Controllers\UserController;
+use Repositories\OrderItemRepository;
+use Repositories\OrderRepository;
 use Repositories\ProductRepository;
 
 try {
@@ -33,12 +41,20 @@ class Router
     private $userController;
     private $productController;
     private $productRepository;
+    private $orderController;
+    private $orderRepository;
+    private $orderItemController;
+    private $orderItemRepository;
 
     public function __construct($db_conn)
     {
         $this->userController = new UserController($db_conn);
         $this->productRepository = new ProductRepository($db_conn);
         $this->productController = new ProductController($this->productRepository);
+        $this->orderRepository = new OrderRepository($db_conn);
+        $this->orderController = new OrderController($this->orderRepository);
+        $this->orderItemRepository = new OrderItemRepository($db_conn);
+        $this->orderItemController = new OrderItemController($this->orderItemRepository);
     }
 
     public function route()
@@ -58,6 +74,20 @@ class Router
                 break;
             case 'post/product':
                 $this->productController->create($_POST, $_FILES);
+                break;
+            case 'post/order':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->orderController->create($data);
+                break;
+            case 'get/order':
+                $this->orderController->getAll();
+                break;
+            case 'post/order-item':
+                $data = json_decode(file_get_contents('php://input'), true);
+                $this->orderItemController->create($data);
+                break;
+            case 'get/order-item':
+                $this->orderItemController->getAll();
                 break;
             default:
                 http_response_code(404);
