@@ -24,10 +24,34 @@ class ProductController
 			return;
 		}
 
+		$imagePath = '';
+		if (isset($files['image']) && $files['image']['error'] == 0) {
+			$uploadDir = 'uploads/';
+			
+			if (!is_dir($uploadDir)) {
+				if (!mkdir($uploadDir, 0755, true)) {
+					http_response_code(500);
+					echo json_encode(['error' => 'Failed to create upload directory.']);
+					return;
+				}
+			}
+			
+			$fileName = $files['image']['name'];
+			$targetPath = $uploadDir . $fileName;
+			
+			if (move_uploaded_file($files['image']['tmp_name'], $targetPath)) {
+				$imagePath = $targetPath;
+			} else {
+				http_response_code(500);
+				echo json_encode(['error' => 'Failed to upload image.']);
+				return;
+			}
+		}
+
 		$newProduct = new Product(
 			0,
 			$data['name'],
-			'teste',
+			$imagePath,
 			(float)$data['price'],
 			(int)$data['stock']
 		);
