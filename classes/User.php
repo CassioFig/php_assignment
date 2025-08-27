@@ -1,18 +1,38 @@
 <?php
 
-class User
+namespace Classes;
+
+use JsonSerializable;
+
+class User implements JsonSerializable
 {
+    private int $id;
     private string $name;
     private string $email;
     private string $password;
     private string $role;
 
-    public function __construct(string $name, string $email, string $password, string $role = 'user')
+    public function __construct(?int $id, string $name, string $email, ?string $password = null, string $role = 'User')
     {
+        if ($id) {
+            $this->id = $id;
+        }
         $this->name = $name;
         $this->email = $email;
-        $this->password = $this->hashPassword($password);
+        if ($password){
+            $this->password = $password;
+        }
         $this->role = $role;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function setId(int $id)
+    {
+        $this->id = $id;
     }
 
     public function getName(): string
@@ -42,7 +62,7 @@ class User
 
     public function setPassword(string $password)
     {
-        $this->name = $password;
+        $this->password = $this->hashPassword($password);
     }
 
     private function hashPassword(string $plainPassword): string
@@ -53,11 +73,20 @@ class User
 
     public function getRole(): string
     {
-        return $this->role;
+        return $this->role ?? 'User';
     }
 
     public function setRole(string $role)
     {
         $this->role = $role;
     }
+
+    public function jsonSerialize(): array {
+		return [
+			'id' => $this->id,
+			'name' => $this->name,
+            'email' => $this->email,
+            'role' => $this->role
+        ];
+	}
 }

@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__. '/config.php';
+require_once __DIR__. '/repositories/UserRepository.php';
 require_once __DIR__. '/Controllers/UserController.php';
 
+use Repositories\UserRepository;
 use Controllers\UserController;
 
 try {
@@ -28,10 +30,12 @@ try {
 class Router
 {
     private $userController;
+    private $userRespository;
 
     public function __construct($db_conn)
     {
-        $this->userController = new UserController($db_conn);
+        $this->userRespository = new UserRepository($db_conn);
+        $this->userController = new UserController($this->userRespository);
     }
 
     public function route()
