@@ -59,4 +59,19 @@ class UserController
 
         echo json_encode(['message' => 'Login successful.', 'user' => $user]);
     }
+
+    public function logout()
+    {
+        if(session_status() === PHP_SESSION_NONE){
+            session_start();
+        }
+
+        if(session_status() === PHP_SESSION_ACTIVE){
+            session_unset();
+            session_destroy();
+            echo "logged out";
+        } else {
+            throw new Exception("Login required.", 401);
+        }
+    }
 }
