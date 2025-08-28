@@ -42,6 +42,49 @@ class UserController
         }
     }
 
+    public function update()
+    {
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+
+        try {
+            if (!isset($data['id'])) {
+                error_log("[INFO] User update failed: Missing user ID");
+                throw new Exception("Missing user ID", 400);
+            }
+
+            $id = (int)$data['id'];
+
+            if ($this->getCurrentUser()->getRole() != UserRole::ADMIN && $id != $this->getCurrentUser()->getId()) {
+                error_log("[INFO] User update failed: Unauthorized attempt to update user ID ". $id);
+                throw new Exception("Unauthorized", 401);
+            }
+
+            $user = $this->userRepository->findById($id);
+            if ($user === null) {
+                error_log("[INFO] User update failed: User not found with ID ". $id);
+                throw new Exception("User not found", 404);
+            }
+
+            if (isset($data['name'])) {
+                $user->setName($data['name']);
+            }
+            if (isset($data['email'])) {
+                $user->setEmail($data['email']);
+            }
+            if (isset($data['password'])) {
+                $user->setPassword($data['password']);
+            }
+            $updatedUser = $this->userRepository->update($user);
+            
+            error_log("[INFO] User updated: ". $user->getEmail(). " (ID: ". $user->getId() .")");
+            echo json_encode(['message' => 'User updated.', 'user' => $updatedUser]);
+        } catch (Exception $e) {
+            error_log("[ERROR] User update error: ". $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function login()
     {
         try {
