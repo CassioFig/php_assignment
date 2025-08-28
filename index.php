@@ -75,12 +75,46 @@ class Router
             case 'post/product':
                 $this->productController->create($_POST, $_FILES);
                 break;
+            case 'get/product':
+                $this->productController->getAll();
+                break;
+            case 'put/product':
+                $input_data = file_get_contents('php://input');
+                $data = $this->parseMultipartData($input_data);
+                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                    $this->productController->update($_GET['id'], $data, $_FILES);
+                } else {
+                    http_response_code(400);
+                }
+                break;
+            case 'delete/product':
+                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                    $this->productController->delete($_GET['id']);
+                } else {
+                    http_response_code(400);
+                }
+                break;
             case 'post/order':
                 $data = json_decode(file_get_contents('php://input'), true);
                 $this->orderController->create($data);
                 break;
             case 'get/order':
                 $this->orderController->getAll();
+                break;
+            case 'put/order':
+                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    $this->orderController->update($_GET['id'], $data);
+                } else {
+                    http_response_code(400);
+                }
+                break;
+            case 'delete/order':
+                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                    $this->orderController->delete($_GET['id']);
+                } else {
+                    http_response_code(400);
+                }
                 break;
             case 'post/order-item':
                 $data = json_decode(file_get_contents('php://input'), true);
@@ -89,9 +123,50 @@ class Router
             case 'get/order-item':
                 $this->orderItemController->getAll();
                 break;
+            case 'put/order-item':
+                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    $this->orderItemController->update($_GET['id'], $data);
+                } else {
+                    http_response_code(400);
+                }
+                break;
+            case 'delete/order-item':
+                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                    $this->orderItemController->delete($_GET['id']);
+                } else {
+                    http_response_code(400);
+                }
+                break;
             default:
                 http_response_code(404);
                 break;
         }
+    }
+
+    private function parseMultipartData($input)
+    {
+        $data = array();
+        preg_match('/boundary=(.*)$/', $_SERVER['CONTENT_TYPE'], $matches);
+        $boundary = $matches[1];
+
+        $blocks = preg_split("/-+$boundary/", $input);
+        array_pop($blocks); // Remove o último elemento vazio
+
+        foreach ($blocks as $block) {
+            if (empty($block)) continue;
+            if (strpos($block, "\r\n\r\n") !== false) {
+                list($headers, $body) = explode("\r\n\r\n", $block, 2);
+            } else {
+                continue;
+            }
+            if (preg_match('/name="([^"]*)"/', $headers, $matches)) {
+                $name = $matches[1];
+                // Limpar quebras de linha do valor
+                $value = trim($body, "\r\n");
+                $data[$name] = $value;
+            }
+        }
+        return $data;
     }
 }

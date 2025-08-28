@@ -178,27 +178,4 @@ class ProductRepository
 
 		return $affected_rows > 0;
 	}
-
-	public function exists(int $id): bool
-	{
-		$sql = "SELECT 1 FROM Products WHERE id = ? LIMIT 1";
-		$stmt = $this->db_conn->prepare($sql);
-
-		if (!$stmt) {
-			throw new Exception("Failed to prepare statement: " . $this->db_conn->error);
-		}
-
-		$stmt->bind_param("i", $id);
-
-		if (!$stmt->execute()) {
-			$stmt->close();
-			throw new Exception("Failed to execute query: " . $stmt->error);
-		}
-
-		$result = $stmt->get_result();
-		$exists = $result->num_rows > 0;
-		$stmt->close();
-
-		return $exists;
-	}
 }
