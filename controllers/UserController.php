@@ -32,4 +32,31 @@ class UserController
         http_response_code(201);
         echo json_encode(['message' => 'User created.', 'user' => $newUser]);
     }
+
+    public function login()
+    {
+        if (!isset($_POST['email']) || !isset($_POST['password'])) {
+            throw new Exception("Missing required fields", 400);
+        }
+
+        if(filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)){
+            $email = $_POST["email"];
+        }else{
+            throw new Exception("Invalid email format.", 400);
+        }
+        $user = $this->userRepository->findByEmail($email);
+        if(!$user){
+            throw new Exception("Email/Password not valid.", 401);
+        }
+
+        if(!password_verify(hash_hmac("sha256", $_POST['password'], PEPPER), $user->getPassword())){
+            throw new Exception("Email/Password not valid.", 401);
+        }
+
+        session_start();
+        $_SESSION['user'] = $user;
+        $_SESSION['LAST_ACTIVITY'] = time();
+
+        echo json_encode(['message' => 'Login successful.', 'user' => $user]);
+    }
 }

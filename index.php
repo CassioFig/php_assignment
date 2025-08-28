@@ -48,6 +48,9 @@ class Router
             case 'post/user':
                 $this->userController->create();
                 break;
+            case 'post/login':
+                $this->userController->login();
+                break;
             default:
                 http_response_code(404);
                 break;
