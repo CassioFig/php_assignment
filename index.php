@@ -19,6 +19,7 @@ try {
     $router = new Router($db_conn);
     $router->route();
 } catch (Exception $e) {
+    error_log("[ERROR] ". $e->getMessage());
     http_response_code($e->getCode() ?: 500);
     echo json_encode(array('errors' => array($e->getMessage())));
     return;
