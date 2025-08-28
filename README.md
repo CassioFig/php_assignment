@@ -104,6 +104,9 @@ php_assignment/
 |--------|----------|-------------|--------------|
 | POST | `/user` | Register new user | Public |
 | POST | `/admin` | Create admin user | Admin only |
+| GET | `/user` | Get user | Authenticated |
+| PATCH | `/user` | Update user | Authenticated |
+| DELETE | `/user` | Delete user | Authenticated |
 | POST | `/login` | User login | Public |
 | GET | `/logout` | User logout | Authenticated |
 
