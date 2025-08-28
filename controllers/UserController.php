@@ -17,14 +17,14 @@ class UserController
         $this->userRepository = $userRepository;
     }
 
-    public function create()
+    public function create($role = 'User')
     {
         // Validate _POST
         if (!isset($_POST['name']) || !isset($_POST['email']) || !isset($_POST['password'])) {
             throw new Exception("Missing required fields", 400);
         }
 
-        $user = new User(null, $_POST['name'], $_POST['email']);
+        $user = new User(null, $_POST['name'], $_POST['email'], $role);
         $user->setPassword($_POST['password']);
 
         $newUser = $this->userRepository->create($user);

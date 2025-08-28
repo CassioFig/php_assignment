@@ -12,7 +12,7 @@ class User implements JsonSerializable
     private string $password;
     private string $role;
 
-    public function __construct(?int $id, string $name, string $email, ?string $password = null, string $role = 'User')
+    public function __construct(?int $id, string $name, string $email, string $role = 'User', ?string $password = null)
     {
         if ($id) {
             $this->id = $id;

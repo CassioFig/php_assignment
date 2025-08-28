@@ -48,6 +48,9 @@ class Router
             case 'post/user':
                 $this->userController->create();
                 break;
+            case 'post/admin':
+                $this->userController->create('Admin');
+                break;
             case 'post/login':
                 $this->userController->login();
                 break;
