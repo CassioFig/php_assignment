@@ -79,7 +79,7 @@ class Router
         // Authorization
         $currentUser = $this->userController->getCurrentUser();
         // must be logged in to access these routes
-        if (in_array($route, ['patch/user', 'delete/user', 'post/order', 'post/order-item', 'get/order-item', 'put/order-item', 'delete/order-item']) && $currentUser === null) {
+        if (in_array($route, ['get/user', 'patch/user', 'delete/user', 'post/order', 'post/order-item', 'get/order-item', 'put/order-item', 'delete/order-item']) && $currentUser === null) {
             throw new Exception("Unauthorized", 401);
         }
         // must be admin to access these routes
@@ -88,6 +88,9 @@ class Router
         }
 
         switch ($route) {
+            case 'get/user':
+                $this->userController->index();
+                break;
             case 'post/user':
                 $this->userController->create();
                 break;

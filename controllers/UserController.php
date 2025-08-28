@@ -19,6 +19,33 @@ class UserController
         $this->userRepository = $userRepository;
     }
 
+    public function index()
+    {
+        try {
+            if (!isset($_GET['id'])) {
+                error_log("[INFO] Fetch user failed: Missing user ID");
+                throw new Exception("Missing user ID", 400);
+            }
+            $id = (int)$_GET['id'];
+
+            if ($this->getCurrentUser()->getRole() != UserRole::ADMIN && $id != $this->getCurrentUser()->getId()) {
+                error_log("[INFO] Fetch user failed: Unauthorized attempt to fetch user ID ". $id);
+                throw new Exception("Unauthorized", 401);
+            }
+
+            $user = $this->userRepository->findById($id);
+            if ($user === null) {
+                error_log("[INFO] Fetch user failed: User not found with ID ". $id);
+                throw new Exception("User not found", 404);
+            }
+            error_log("[INFO] User fetched: ". $user->getEmail(). " (ID: ". $user->getId() .")");
+            echo json_encode(['user' => $user]);
+        } catch (Exception $e) {
+            error_log("[ERROR] Fetch user error: ". $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function create($role = UserRole::USER)
     {
         try {
