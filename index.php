@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/controllers/UserController.php';
+require_once __DIR__ . '/repositories/UserRepository.php';
+require_once __DIR__ . '/Controllers/UserController.php';
+require_once __DIR__ . '/enums/UserRole.php';
 require_once __DIR__ . '/controllers/ProductController.php';
 require_once __DIR__ . '/repositories/ProductRepository.php';
 require_once __DIR__ . '/repositories/OrderRepository.php';
@@ -8,13 +10,15 @@ require_once __DIR__ . '/controllers/OrderController.php';
 require_once __DIR__ . '/repositories/OrderItemRepository.php';
 require_once __DIR__ . '/controllers/OrderItemController.php';
 
+use Controllers\UserController;
+use Enums\UserRole;
 use Controllers\OrderController;
 use Controllers\OrderItemController;
 use Controllers\ProductController;
-use Controllers\UserController;
 use Repositories\OrderItemRepository;
 use Repositories\OrderRepository;
 use Repositories\ProductRepository;
+use Repositories\UserRepository;
 
 try {
     // Create db connection
@@ -22,11 +26,13 @@ try {
     if ($db_conn->connect_error) {
         throw new Exception("Connection failed: " . $db_conn->connect_error, 500);
     }
+
     // Routing
     $router = new Router($db_conn);
     $router->route();
 } catch (Exception $e) {
-    header("HTTP/1.0 500 Internal Server Error");
+    error_log("[ERROR] " . $e->getMessage());
+    http_response_code($e->getCode() ?: 500);
     echo json_encode(array('errors' => array($e->getMessage())));
     return;
 } finally {
@@ -39,6 +45,7 @@ try {
 class Router
 {
     private $userController;
+    private $userRespository;
     private $productController;
     private $productRepository;
     private $orderController;
@@ -48,7 +55,8 @@ class Router
 
     public function __construct($db_conn)
     {
-        $this->userController = new UserController($db_conn);
+        $this->userRespository = new UserRepository($db_conn);
+        $this->userController = new UserController($this->userRespository);
         $this->productRepository = new ProductRepository($db_conn);
         $this->productController = new ProductController($this->productRepository);
         $this->orderRepository = new OrderRepository($db_conn);
@@ -68,9 +76,29 @@ class Router
 
         $route = $request_method . '/' . $last_segment;
 
+        // Authorization
+        $currentUser = $this->userController->getCurrentUser();
+        // must be logged in to access these routes
+        if (in_array($route, ['post/order']) && $currentUser === null) {
+            throw new Exception("Unauthorized", 401);
+        }
+        // must be admin to access these routes
+        elseif (in_array($route, ['post/admin']) && ($currentUser === null || $currentUser->getRole() !== UserRole::ADMIN)) {
+            throw new Exception("Forbidden", 403);
+        }
+
         switch ($route) {
             case 'post/user':
                 $this->userController->create();
+                break;
+            case 'post/admin':
+                $this->userController->create(UserRole::ADMIN);
+                break;
+            case 'post/login':
+                $this->userController->login();
+                break;
+            case 'get/logout':
+                $this->userController->logout();
                 break;
             case 'post/product':
                 $this->productController->create($_POST, $_FILES);
