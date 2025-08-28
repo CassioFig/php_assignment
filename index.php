@@ -19,7 +19,7 @@ try {
     $router = new Router($db_conn);
     $router->route();
 } catch (Exception $e) {
-    header("HTTP/1.0 500 Internal Server Error");
+    http_response_code($e->getCode() ?: 500);
     echo json_encode(array('errors' => array($e->getMessage())));
     return;
 } finally {
