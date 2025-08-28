@@ -12,8 +12,6 @@ A RESTful API built with PHP for managing an e-commerce system with user authent
 - [API Endpoints](#api-endpoints)
 - [Authentication & Authorization](#authentication--authorization)
 - [Database Schema](#database-schema)
-- [Usage Examples](#usage-examples)
-- [Error Handling](#error-handling)
 
 ## Features
 
