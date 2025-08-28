@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/repositories/UserRepository.php';
 require_once __DIR__ . '/Controllers/UserController.php';
 require_once __DIR__ . '/enums/UserRole.php';

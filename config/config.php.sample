@@ -1,0 +1,8 @@
+<?php
+
+const DB_SERVERNAME = "localhost";
+const DB_USERNAME = "";
+const DB_PASS = "";
+const DB_NAME = "";
+const PEPPER = "";
+const SESSION_TIMEOUT = 900; // 15 minutes
