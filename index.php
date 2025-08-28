@@ -79,11 +79,11 @@ class Router
         // Authorization
         $currentUser = $this->userController->getCurrentUser();
         // must be logged in to access these routes
-        if (in_array($route, ['post/order']) && $currentUser === null) {
+        if (in_array($route, ['post/order', 'post/order-item', 'get/order-item', 'put/order-item', 'delete/order-item']) && $currentUser === null) {
             throw new Exception("Unauthorized", 401);
         }
         // must be admin to access these routes
-        elseif (in_array($route, ['post/admin']) && ($currentUser === null || $currentUser->getRole() !== UserRole::ADMIN)) {
+        elseif (in_array($route, ['post/admin', 'post/product', 'put/product', 'delete/product', 'get/order', 'put/order', 'delete/order']) && ($currentUser === null || $currentUser->getRole() !== UserRole::ADMIN)) {
             throw new Exception("Forbidden", 403);
         }
 
