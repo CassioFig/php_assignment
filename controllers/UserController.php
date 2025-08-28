@@ -56,11 +56,13 @@ class UserController
                 error_log("[INFO] Login failed: Invalid email format (". $_POST["email"] . ")");
                 throw new Exception("Invalid email format.", 400);
             }
-            $user = $this->userRepository->findByEmail($email);
-            if(!$user){
+            $users = $this->userRepository->findBy(['email' => $email]);
+            if(count($users) == 0){
                 error_log("[INFO] Login failed: Email not found (". $email . ")");
                 throw new Exception("Email/Password not valid.", 401);
             }
+
+            $user = $users[0];
 
             if(!password_verify(hash_hmac("sha256", $_POST['password'], PEPPER), $user->getPassword())){
                 error_log("[INFO] Login failed: Invalid password for email (". $email . ")");
