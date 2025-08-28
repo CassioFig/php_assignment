@@ -2,9 +2,11 @@
 require_once __DIR__. '/config.php';
 require_once __DIR__. '/repositories/UserRepository.php';
 require_once __DIR__. '/Controllers/UserController.php';
+require_once __DIR__. '/enums/UserRole.php';
 
 use Repositories\UserRepository;
 use Controllers\UserController;
+use Enums\UserRole;
 
 try {
     // Create db connection
@@ -44,12 +46,23 @@ class Router
         $request_uri = $_SERVER['REQUEST_URI'];
         $route = $request_method. $request_uri;
 
+        // Authorization
+        $currentUser = $this->userController->getCurrentUser();
+        // must be logged in to access these routes
+        if (in_array($route, ['post/order']) && $currentUser === null) {
+            throw new Exception("Unauthorized", 401);
+        }
+        // must be admin to access these routes
+        elseif (in_array($route, ['post/admin']) && ($currentUser === null || $currentUser->getRole() !== UserRole::ADMIN)) {
+            throw new Exception("Forbidden", 403);
+        }
+
         switch($route) {
             case 'post/user':
                 $this->userController->create();
                 break;
             case 'post/admin':
-                $this->userController->create('Admin');
+                $this->userController->create(UserRole::ADMIN);
                 break;
             case 'post/login':
                 $this->userController->login();

@@ -3,10 +3,12 @@ namespace Controllers;
 
 require_once __DIR__. '/../classes/User.php';
 require_once __DIR__. '/../repositories/UserRepository.php';
+require_once __DIR__. '/../enums/UserRole.php';
 
 use Exception;
 use Classes\User;
 use Repositories\UserRepository;
+use Enums\UserRole;
 
 class UserController
 {
@@ -17,7 +19,7 @@ class UserController
         $this->userRepository = $userRepository;
     }
 
-    public function create($role = 'User')
+    public function create($role = UserRole::USER)
     {
         // Validate _POST
         if (!isset($_POST['name']) || !isset($_POST['email']) || !isset($_POST['password'])) {
@@ -73,5 +75,26 @@ class UserController
         } else {
             throw new Exception("Login required.", 401);
         }
+    }
+
+    public function getCurrentUser(): ?User
+    {
+        if(session_status() === PHP_SESSION_NONE){
+            session_start();
+        }
+
+        if(!isset($_SESSION['user']) || !isset($_SESSION['LAST_ACTIVITY'])){
+            return null;
+        }
+
+        if(time() - $_SESSION['LAST_ACTIVITY'] > SESSION_TIMEOUT){
+            session_unset();
+            session_destroy();
+            return null;
+        }
+
+        $_SESSION['LAST_ACTIVITY'] = time();
+
+        return $_SESSION['user'];
     }
 }
