@@ -85,6 +85,37 @@ class UserController
         }
     }
 
+    public function delete()
+    {
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+
+        try {
+            if (!isset($data['id'])) {
+                error_log("[INFO] User update failed: Missing user ID");
+                throw new Exception("Missing user ID", 400);
+            }
+
+            $id = (int)$data['id'];
+
+            if ($this->getCurrentUser()->getRole() != UserRole::ADMIN && $id != $this->getCurrentUser()->getId()) {
+                error_log("[INFO] User deletion failed: Unauthorized attempt to delete user ID ". $id);
+                throw new Exception("Unauthorized", 401);
+            }
+            $user = $this->userRepository->findById($id);
+            if ($user === null) {
+                error_log("[INFO] User deletion failed: User not found with ID ". $id);
+                throw new Exception("User not found", 404);
+            }
+            $this->userRepository->delete($user);
+            error_log("[INFO] User deleted: ". $user->getEmail(). " (ID: ". $user->getId() .")");
+            echo json_encode(['message' => 'User deleted.']);
+        } catch (Exception $e) {
+            error_log("[ERROR] User deletion error: ". $e->getMessage());
+            throw $e;
+        }
+    }
+
     public function login()
     {
         try {
